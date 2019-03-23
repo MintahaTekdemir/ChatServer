@@ -18,8 +18,20 @@ io.on('connection', function(socket){
 });
 
 io.on('connection', function(socket){
-    socket.on('send message', function(msg){
-        io.emit('new message', msg);
+    socket.on('chat message', function(msg){
+        console.log('message: ' + msg);
+    });
+});
+
+io.emit('some event', { for: 'everyone' });
+
+io.on('connection', function(socket){
+    socket.broadcast.emit('hi');
+});
+
+io.on('connection', function(socket){
+    socket.on('chat message', function(msg){
+        io.emit('chat message', msg);
     });
 });
 

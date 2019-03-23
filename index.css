@@ -1,14 +1,3 @@
 
-#chat{
-     height:500px;
+body { font: 13px Helvetica, Arial; }
 
- }
-
-#contentWrap{
-    display:none;
-}
-
-#chatWrap{
-    float: left;
-    border: 2px #000 solid;
-}
