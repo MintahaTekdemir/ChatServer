@@ -6,6 +6,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var newuser = [];
+var users = {};
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -43,6 +44,7 @@ io.on('connection', function(socket) {
         if (newuser.indexOf(username) == -1) {
             socket.names = username;
             newuser.push(socket.names);
+            users[socket.names]=socket.id  // save the userids in users
             io.emit('usernames', newuser);
             io.sockets.emit('chat message', {message : socket.names + " is online", date : date
             });
@@ -59,7 +61,13 @@ io.on('connection', function(socket) {
         });
     });
 
+socket.on('private message', function(privateData){
 
+    socket.to(users[privateData.privateMsgTo]).emit('private nessage',
+        {privateMessageFrom : socket.names, msg: privateData.msg
+    });
+
+});
 
 });
 

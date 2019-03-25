@@ -10,6 +10,7 @@
         #currentUsers {float: right;}
         #ChatPage{display:none;}
         #messageBox{margin-top:50%; position: absolute}
+        #privateBox{position: center}
     </style>
 
 </head>
@@ -45,6 +46,7 @@
             return false;
         });
         // add the new connect user and displayed with .html
+        //userlist
         socket.on('usernames',function(user){
             var userLists='';
             var i=0;
@@ -53,6 +55,19 @@
                 $('#currentUsers').html(userLists);
             }
         });
+        $('#privateform').submit(function(){
+            socket.emit('private message',{
+                msg: $('#messageToSend').val(),
+                privateMsgTo: $('#privatemessage').val()
+            } );
+            $('#messageToSend').val('');
+            return false;
+        });
+
+        socket.on('private message', function(msg){
+            $('#messages').append($('<li>').text('-PRIVATE-Message From: ' + msg.privateMessageFrom + ' ' + msg.msg ));
+        });
+
     });
 </script>
 
@@ -74,6 +89,12 @@
         <ul id="messages"></ul>
         <form action="" id="chatform">
             <input id="messageToSend" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+    <!-- private message area-->
+    <div id="privateBox">
+        <form action="" id="privateform">
+            <input id="privatemessage" autocomplete="off" /><button>Send Private</button>
         </form>
     </div>
     <!-- User List Div, displayed connect user-->
