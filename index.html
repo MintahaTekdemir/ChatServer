@@ -56,14 +56,14 @@
             }
         });
         // enter the username to privatemessage-label
-        // enter the message to messagtetoSend-label
+        // enter the message to messagetoSend-label
         //click the button send private
         // and the user receive the private message
         $('#privateform').submit(function(){
             socket.emit('private message',{
                 msg: $('#messageToSend').val(),
                 privateMsgTo: $('#privatemessage').val()
-            } );
+            });
             $('#messageToSend').val('');
             return false;
         });
@@ -71,7 +71,6 @@
         socket.on('private message', function(msg){
             $('#messages').append($('<li>').text('-PRIVATE-Message From: ' + msg.privateMessageFrom + ' ' + msg.msg ));
         });
-
     });
 </script>
 

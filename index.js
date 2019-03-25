@@ -28,7 +28,7 @@ io.on('connection', function(socket) {
         if (!socket.names) return;
         newuser.splice(newuser.indexOf(socket.names), 1);
         io.emit('usernames', newuser);
-        io.sockets.emit('chat message', {message : socket.names + " is offline", date : date
+        io.sockets.emit('chat message', {message : socket.names + " is offline",name : socket.names, date : date
         });
 
     });
@@ -44,9 +44,9 @@ io.on('connection', function(socket) {
         if (newuser.indexOf(username) == -1) {
             socket.names = username;
             newuser.push(socket.names);
-            users[socket.names]=socket.id  // save the userids in users
+            users[socket.names]=socket; // save the userids in socket
             io.emit('usernames', newuser);
-            io.sockets.emit('chat message', {message : socket.names + " is online", date : date
+            io.sockets.emit('chat message', {message : socket.names + " is online",name : socket.names, date : date
             });
             callback(true);
         } else {
@@ -63,8 +63,8 @@ io.on('connection', function(socket) {
 
     //
    socket.on('private message', function(privateData){
-    socket.to(users[privateData.privateMsgTo]).emit('private nessage',
-        {privateMessageFrom : socket.names, msg: privateData.msg
+  //  socket.to(users[privateData.privateMsgTo]).emit('private nessage',
+            users[privateData.privateMsgTo].emit('private message',{privateMessageFrom : socket.names, msg: privateData.msg
     });
 
 });
