@@ -69,7 +69,7 @@
         });
 
         socket.on('private message', function(msg){
-            $('#messages').append($('<li>').text('-PRIVATE-Message From: ' + msg.privateMessageFrom + ' ' + msg.msg ));
+            $('#messages').append($('<li>').text(msg.date + ' -PRIVATE-Message From: '+ msg.privateMessageFrom + ' : ' + msg.msg ));
         });
     });
 </script>

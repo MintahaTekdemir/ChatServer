@@ -61,10 +61,10 @@ io.on('connection', function(socket) {
         });
     });
 
-    //
+    //private message
    socket.on('private message', function(privateData){
-  //  socket.to(users[privateData.privateMsgTo]).emit('private nessage',
-            users[privateData.privateMsgTo].emit('private message',{privateMessageFrom : socket.names, msg: privateData.msg
+       var date= new Date();
+            users[privateData.privateMsgTo].emit('private message',{privateMessageFrom : socket.names, msg: privateData.msg, date:date
     });
 
 });
