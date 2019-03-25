@@ -1,79 +1,84 @@
 <!doctype html>
 <html>
 <head>
-    <link rel="stylesheet" href="index.css">
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-        $(function () {
-            var socket = io();
-            $('form').submit(function(e){
-                e.preventDefault(); // prevents page reloading
-                socket.emit('chat message', $('#msgToSend').val());
-                $('#msgToSend').val('');
-                return false;
-            });
-            socket.on('chat message', function(msg){
-                $('#messagesUL').append($('<li>').text(msg));
-            });
 
-            $('usernameField').submit(function(e) {
-                e.preventDefault();
-                socket.emit('added user', $('#usernameField').val(), function (data) {
-                    if (data) {
-                        $('#homepage').hide();
-                        $('#messageULbox').show();
-                    } else {
+    <title>Group O</title>
 
-                    }
-
-                });
-                $('#usernameField').val('');
-            });
-
-
-
-
-
-        });
-            </script>
-    <title>Socket.IO chat</title>
+    <!--style for homepage and chat room-->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-        #messagesUL { list-style-type: none; margin: 0; padding: 0; }
-        #messages li { padding: 5px 10px; }
-        #messages li:nth-child(odd) { background: #eee; }
-        #homepage{text-align: center; }
-        #userfieldBox{margin: auto;width: 50%; padding: 10px;}
-        #usernameField{ background: darkgrey; width: 50%; }
-        #messageULbox{display: none}
-
-
+        body {font: 15px "Agency FB";}
+        #currentUsers {float: right;}
+        #ChatPage{display:none;}
+        #messageBox{margin-top:50%; position: absolute}
     </style>
+
 </head>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 
+<script>
+
+    $(function () {
+        var socket = io();
+
+        $('#chatform').submit(function(){
+            socket.emit('chat message', $('#messageToSend').val());
+            $('#messageToSend').val('');
+            return false;
+        });
+        // displayed the message to the chat room with date and username
+        socket.on('chat message', function(msg){
+            $('#messages').append($('<li>').text(msg.date + ' ' + msg.name + ' : ' + msg.message + ' ' ));
+        });
+        // if user logged into chat room, homepage is hide and shows chat page
+        // and is the username not valid  -> alert message
+        $('#loginform').submit(function() {
+            socket.emit('login user', $('#logname').val(),function(username){
+                if(username){
+                    $('#homepage').hide();
+                    $('#ChatPage').show();
+                }else{
+                    alert("This username is exists");
+                }
+            });
+            $('#logname').val('');
+            return false;
+        });
+        // add the new connect user and displayed with .html
+        socket.on('usernames',function(user){
+            var userLists='';
+            var i=0;
+            for(i; i<user.length;i++) {
+               userLists+= user[i] + '<br/>';
+                $('#currentUsers').html(userLists);
+            }
+        });
+    });
+</script>
+
+<body>
+
+<!-- Loginpage with a input and button-->
 <div id="homepage">
-    <p></p>
-<h3>Welcome to GroupO-Chat </h3>
-<div id="userfieldBox">
-<form id="usernameField">
-    <input id="username"/><button>Login</button>
-</form>
-</div>
+    <h1>Welcome to Group O Chat Server !</h1>
+    <br />
+    <form action="" id="loginform">
+        <input id="logname" autocomplete="off" /><button>Login</button>
+    </form>
 </div>
 
-
-<div id="messageULbox">
-<ul id="messagesUL"></ul>
-<form action="">
-    <input id="msgToSend" autocomplete="off" /><button>Send</button>
-</form>
+<!-- Chat room Div-->
+<div id="ChatPage">
+    <!-- displayed messages-->
+    <div id="messageBox">
+        <ul id="messages"></ul>
+        <form action="" id="chatform">
+            <input id="messageToSend" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+    <!-- User List Div, displayed connect user-->
+    <div id="currentUsers"></div>
 </div>
-    <div id="users"></div>
-</div>
-
+<!-- Chat room Div Ends-->
 </body>
 </html>
