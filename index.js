@@ -61,8 +61,8 @@ io.on('connection', function(socket) {
         });
     });
 
-socket.on('private message', function(privateData){
-
+    //
+   socket.on('private message', function(privateData){
     socket.to(users[privateData.privateMsgTo]).emit('private nessage',
         {privateMessageFrom : socket.names, msg: privateData.msg
     });

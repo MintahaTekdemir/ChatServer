@@ -39,7 +39,7 @@
                     $('#homepage').hide();
                     $('#ChatPage').show();
                 }else{
-                    alert("This username is exists");
+                    alert("This username exists");
                 }
             });
             $('#logname').val('');
@@ -55,6 +55,10 @@
                 $('#currentUsers').html(userLists);
             }
         });
+        // enter the username to privatemessage-label
+        // enter the message to messagtetoSend-label
+        //click the button send private
+        // and the user receive the private message
         $('#privateform').submit(function(){
             socket.emit('private message',{
                 msg: $('#messageToSend').val(),
