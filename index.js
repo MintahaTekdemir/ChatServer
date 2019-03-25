@@ -1,5 +1,6 @@
 /**
- *@author Mintaha Tekdemir
+ *@author Mintaha Tekdemir, 751226
+ * Ioanna
  */
 
 var app = require('express')();
@@ -66,9 +67,13 @@ io.on('connection', function(socket) {
        var date= new Date();
             users[privateData.privateMsgTo].emit('private message',{privateMessageFrom : socket.names, msg: privateData.msg, date:date
     });
-
 });
+   //chat multicast
+    socket.on('multicast chat', function(data){
+        var date= new Date();
 
+
+    });
 });
 
 

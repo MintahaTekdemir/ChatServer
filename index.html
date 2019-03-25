@@ -1,3 +1,5 @@
+<!--@author Mintaha Tekdemir, 751226-->
+<!-- Ioanna-->
 <!doctype html>
 <html>
 <head>
@@ -71,6 +73,7 @@
         socket.on('private message', function(msg){
             $('#messages').append($('<li>').text(msg.date + ' -PRIVATE-Message From: '+ msg.privateMessageFrom + ' : ' + msg.msg ));
         });
+
     });
 </script>
 
