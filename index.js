@@ -44,7 +44,7 @@ io.on('connection', function(socket) {
         if (newuser.indexOf(username) == -1) {
             socket.names = username;
             newuser.push(socket.names);
-            users[socket.names]=socket; // save the userids in socket
+            users[socket.names]=socket; // save the users in socket
             io.emit('usernames', newuser);
             io.sockets.emit('chat message', {message : socket.names + " is online",name : socket.names, date : date
             });
