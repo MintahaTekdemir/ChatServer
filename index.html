@@ -67,11 +67,29 @@
                 privateMsgTo: $('#privatemessage').val()
             });
             $('#messageToSend').val('');
+            $('#privatemessage').val('');
             return false;
         });
 
         socket.on('private message', function(msg){
             $('#messages').append($('<li>').text(msg.date + ' -PRIVATE-Message From: '+ msg.privateMessageFrom + ' : ' + msg.msg ));
+        });
+        $('#multicastform').submit(function(){
+            socket.emit('multicast chat',{
+                msg: $('#messageToSend').val(),
+                multiMessageTo: $('#multimessage').val()
+            },function (status) {
+                if(!status){
+                    alert("Invalid username entered!");
+                }
+            });
+            $('#messageToSend').val('');
+            $('#multimessage').val('');
+            return false;
+        });
+
+        socket.on('multicast chat', function(msg){
+            $('#messages').append($('<li>').text(msg.date + ' -Multicast-Message From: '+ msg.multiMessageFrom+ ' To '+msg.To+ ' : ' + msg.msg ));
         });
 
     });
@@ -101,6 +119,12 @@
     <div id="privateBox">
         <form action="" id="privateform">
             <input id="privatemessage" autocomplete="off" /><button>Send Private</button>
+        </form>
+    </div>
+    <!-- multi message area-->
+    <div id="multiBox">
+        <form action="" id="multicastform">
+            <input id="multimessage" autocomplete="off" /><button>Send Multicast</button>
         </form>
     </div>
     <!-- User List Div, displayed connect user-->
