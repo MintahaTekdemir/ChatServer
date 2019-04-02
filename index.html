@@ -1,5 +1,5 @@
 <!--@author Mintaha Tekdemir, 751226-->
-<!-- Ioanna-->
+<!-- mintaha.tekdemir@student.reutlingen-university.de-->
 <!doctype html>
 <html>
 <head>
@@ -8,11 +8,14 @@
 
     <!--style for homepage and chat room-->
     <style>
-        body {font: 15px "Agency FB";}
+        body {font: 15px "Agency FB";margin:0;  padding: 0; background-color: aliceblue;}
+        html {height: 65%;}
         #currentUsers {float: right;}
         #ChatPage{display:none;}
-        #messageBox{margin-top:50%; position: absolute}
+        #messageBox{margin-top: 5%; position: fixed;}
         #privateBox{position: center}
+        #currentUsers{height: 200px;width: 250px;background-color: powderblue;}
+
     </style>
 
 </head>
@@ -23,15 +26,39 @@
 
     $(function () {
         var socket = io();
+        var file;
+        var fName='';
+        var size=0;
+        var addFile = false;
+        var fReader = new FileReader();
 
         $('#chatform').submit(function(){
-            socket.emit('chat message', $('#messageToSend').val());
+            var msg={};
+            if(addFile){
+                msg.file = file;
+                msg.nameFile = fName;
+                msg.fileSize = size;
+
+                addFile = false;
+                fName = '';
+                size = '';
+                file = null;
+            }
+            msg.msg = $('#messageToSend').val();
+            socket.emit('chat message', msg);
             $('#messageToSend').val('');
             return false;
         });
         // displayed the message to the chat room with date and username
+        // you can upload file into message
+        // the file added as link in the chat
         socket.on('chat message', function(msg){
-            $('#messages').append($('<li>').text(msg.date + ' ' + msg.name + ' : ' + msg.message + ' ' ));
+            if(msg.file){
+                var addedFile = "<a download="+msg.nameFile+" href="+msg.file+" id='upload'>"+msg.nameFile+"</a>";
+                $('#messages').append($('<li>'+" "+msg.date + " " + msg.name + " : " + msg.message +'</li>'+" "+ addedFile ));
+            }else{
+                $('#messages').append($('<li>').text(msg.date + ' ' + msg.name + ' : ' + msg.message));
+            }
         });
         // if user logged into chat room, homepage is hide and shows chat page
         // and is the username not valid  -> alert message
@@ -61,19 +88,57 @@
         // enter the message to messagetoSend-textfield
         //click the button send private
         // and the user receive the private message
+        // added file into message as a link
         $('#privateform').submit(function(){
-            socket.emit('private message',{
-                msg: $('#messageToSend').val(),
-                privateMsgTo: $('#privatemessage').val()
+            var privateData={};
+            if(addFile){
+                privateData.file = file;
+                privateData.nameFile = fName;
+                privateData.fileSize = size;
+
+                addFile = false;
+                fName = '';
+                size = '';
+                file = null;
+            }
+            privateData.msg=$('#messageToSend').val();
+            privateData.privateMsgTo= $('#privatemessage').val();
+            socket.emit('private message', privateData,function (callb) {
+                if(callb == "OK"){
+                }else if(callb=="emptyMSG"){
+                    alert("Empty Message!");
+                } else if (callb=="msgToHIMSELF"){
+                    alert("You can't send a message to yourself!");
+                } else if(callb =="emptyUser"){
+                    alert("Please select a user for private message!");
+                } else if(callb =="invalid"){
+                    alert("Invalid User");
+                }
             });
+
             $('#messageToSend').val('');
             $('#privatemessage').val('');
             return false;
         });
 
-        socket.on('private message', function(msg){
-            $('#messages').append($('<li>').text(msg.date + ' -PRIVATE-Message From: '+ msg.privateMessageFrom + ' : ' + msg.msg ));
-        });
+        // upload file added to message with a link
+        socket.on('private message', function(privateData){
+            if(privateData.file) {
+                var addedFile = "<a download=" + privateData.nameFile + " href=" + privateData.file + " id='upload'>" + privateData.nameFile + "</a>";
+                $('#messages').append($('<li>'+" "+privateData.date + "-PRIVATE-Message From:" + privateData.privateMessageFrom + " : " + privateData.msg +'</li>'+" "+ addedFile ));
+            }else {
+
+                $('#messages').append($('<li>').text(privateData.date + ' -PRIVATE-Message From: ' + privateData.privateMessageFrom + ' : ' + privateData.msg));
+            }
+            });
+
+        // send message to subset of users
+        // recipients are informed about to whom this msg was sent
+        // enter the username to multicast-textfield
+        // enter the message to messagetoSend-textfield
+        //click the button send send multicast
+        // Syntax enter name of User: Test1,Test2 without space
+
         $('#multicastform').submit(function(){
             socket.emit('multicast chat',{
                 msg: $('#messageToSend').val(),
@@ -92,6 +157,19 @@
             $('#messages').append($('<li>').text(msg.date + ' -Multicast-Message From: '+ msg.multiMessageFrom+ ' To '+msg.To+ ' : ' + msg.msg ));
         });
 
+
+        //Upload File
+
+        $('#fileData').change(function(e){
+            file = e.target.files[0];
+            fName = file.name;
+            size = file.size/1024/1024;
+            fReader.readAsDataURL(file);
+            addFile=true;
+            fReader.onload  = function(){
+                file = fReader.result;
+            }
+        });
     });
 </script>
 
@@ -120,6 +198,7 @@
         <form action="" id="privateform">
             <input id="privatemessage" autocomplete="off" /><button>Send Private</button>
         </form>
+        <input id="fileData" type="file">
     </div>
     <!-- multi message area-->
     <div id="multiBox">

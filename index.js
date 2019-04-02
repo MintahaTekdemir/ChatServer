@@ -1,6 +1,6 @@
 /**
  *@author Mintaha Tekdemir, 751226
- * Ioanna
+ * mintaha.tekdemir@student.reutlingen-university.de
  */
 
 var app = require('express')();
@@ -8,6 +8,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var newuser = [];
 var users = {};
+var loadfile;
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -59,25 +60,66 @@ io.on('connection', function(socket) {
     socket.on('chat message', function(msg) {
         var date = new Date();
         if(!msg.msg) {
-           }else {
-            io.sockets.emit('chat message', {message: msg, name: socket.names, date: date});
+        }else {
+            if(msg.file){
+                io.sockets.emit('chat message', {message: msg.msg, name: socket.names, date: date, file: msg.file, nameFile: msg.nameFile});
+            }else{
+                io.sockets.emit('chat message', {message: msg.msg, name: socket.names, date: date});
+            }
         }
     });
 
 
     //private message
-   socket.on('private message', function(privateData){
+    // send private message to online user
+   socket.on('private message', function(privateData,callback){
        var date= new Date();
-        if(!privateData.msg) {
-       }else{
+       var callb = "OK";
+       var user= [privateData.privateMsgTo];
+        if(!privateData.privateMsgTo){
+            callb = "emptyUser";
+        }else {
+            if (!privateData.msg) {
+                callb = "emptyMSG";
+            }else if (privateData.privateMsgTo==socket.names){
+                callb = "msgToHIMSELF";
+            } else {
+                if(!isValidUser(user)){
+                    callb = "invalid";
+                }else{
+                    if (privateData.file) {
+                        users[privateData.privateMsgTo].emit('private message', {
+                            privateMessageFrom: socket.names,
+                            msg: privateData.msg,
+                            date: date,
+                            file: privateData.file,
+                            nameFile: privateData.nameFile
+                        });
+                        users[socket.names].emit('private message', {
+                            privateMessageFrom: socket.names,
+                            msg: privateData.msg,
+                            date: date,
+                            file: privateData.file,
+                            nameFile: privateData.nameFile
+                        });
+                    } else {
+                        users[privateData.privateMsgTo].emit('private message', {
+                            privateMessageFrom: socket.names, msg: privateData.msg, date: date
+                        });
+                        users[socket.names].emit('private message', {
+                            privateMessageFrom: socket.names, msg: privateData.msg, date: date
+                        });
+                    }
+                }
 
-           users[privateData.privateMsgTo].emit('private message', {privateMessageFrom: socket.names, msg: privateData.msg, date: date
-           });
-           users[socket.names].emit('private message', {privateMessageFrom: socket.names, msg: privateData.msg, date: date
-           });
-       }
+            }
+        }
+        callback(callb);
 });
-   //chat multicast
+     //chat multicast
+    // send message to subset of users
+    // recipients are informed about to whom this msg was sent
+    // Syntax enter username: Test1,Test2
     socket.on('multicast chat', function(data,callback) {
         var date = new Date();
         var splitted = data.multiMessageTo.split(",");
@@ -93,7 +135,8 @@ io.on('connection', function(socket) {
         }
     });
 });
-//
+
+//check if the user is valid
 function isValidUser(array){
     var valid=true;
     array.forEach(function (value) {
@@ -103,3 +146,4 @@ function isValidUser(array){
     });
     return valid;
 }
+
